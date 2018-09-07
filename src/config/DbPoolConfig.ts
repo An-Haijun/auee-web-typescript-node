@@ -18,23 +18,23 @@ class DbConfig {
 
     query(sql: string, params: any = {}) {
         return new Promise(($resolve, $reject) => {
-            const $connection: any = mysql.createConnection(this.config);
+            const $poolConnection: any = mysql.createPool(this.config);
             const connectFun = () => {
                 return new Promise((resolve, reject) => {
-                    $connection.connect((err: any) => {
+                    $poolConnection.getConnection((err: any, connext: any) => {
                         if (err) {
                             // throw err;
                             reject(err);
                             return;
                         }
-                        resolve();
+                        resolve(connext);
                     });
 
                 });
             };
-            const queryFun = (sql: string, params: any = {}) => {
+            const queryFun = (sql: string, connect: any) => {
                 return new Promise((resolve, reject) => {
-                    $connection.query(sql, params, (err: any, results: any, fields: any) => {
+                    $poolConnection.query(sql, (err: any, results: any, fields: any) => {
 
                         if (err) {
                             // throw err;
@@ -42,22 +42,18 @@ class DbConfig {
                             return;
                         }
                         resolve(results);
+                        // 释放连接池中的数据库连接
+                        connect.release();
                         // 停止链接数据库，必须再查询语句后，要不然一调用这个方法，就直接停止链接，数据操作就会失败
-
+                        $poolConnection.end();
                     });
                 });
             };
-            connectFun().then(() => { return queryFun(sql); }).then((res: any) => {
+            connectFun().then((connect) => { return queryFun(sql, connect); }).then((res: any) => {
                 $resolve(res);
-                $connection.end(function (err: any) {
-                    if (err) {
-                        console.log("关闭数据库连接失败！");
-                        throw err;
-                    }
-                });
             }).catch((err: any) => {
                 $reject(err);
-                $connection.end(function (err: any) {
+                $poolConnection.end(function (err: any) {
                     if (err) {
                         console.log("关闭数据库连接失败！");
                         throw err;

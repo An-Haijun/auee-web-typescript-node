@@ -1,4 +1,4 @@
-import DbConfig from "../../config/DbConfig";
+import DbConfig from "../../config/DbPoolConfig";
 import Promise from "bluebird";
 const dbConfig = new DbConfig();
 class UserDao {
