@@ -13,12 +13,15 @@ class DbConfig {
         password: process.env.MYSQL_PASSWORD,
         multipleStatements: true
     };
-
+    poolConnection: any = mysql.createPool(this.config);
     constructor() { }
-
     query(sql: string, params: any = {}) {
         return new Promise(($resolve, $reject) => {
-            const $poolConnection: any = mysql.createPool(this.config);
+            if (this.poolConnection._closed) {
+                this.poolConnection = mysql.createPool(this.config);
+            }
+            const $poolConnection = this.poolConnection;
+
             const connectFun = () => {
                 return new Promise((resolve, reject) => {
                     $poolConnection.getConnection((err: any, connext: any) => {
@@ -41,11 +44,10 @@ class DbConfig {
                             reject(err);
                             return;
                         }
-                        resolve(results);
                         // 释放连接池中的数据库连接
-                        connect.release();
-                        // 停止链接数据库，必须再查询语句后，要不然一调用这个方法，就直接停止链接，数据操作就会失败
-                        $poolConnection.end();
+                        // connect.release();
+                        $poolConnection.releaseConnection(connect);
+                        resolve(results);
                     });
                 });
             };
@@ -53,13 +55,16 @@ class DbConfig {
                 $resolve(res);
             }).catch((err: any) => {
                 $reject(err);
+                console.log("抛出错误---");
                 $poolConnection.end(function (err: any) {
                     if (err) {
                         console.log("关闭数据库连接失败！");
                         throw err;
                     }
+                    console.log("关闭数据库---");
                 });
             });
+
         });
     }
 }

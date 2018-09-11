@@ -13,7 +13,6 @@ import Jwt from "./util/Jwt";
 import RouterMain from "./router/RouterMain";
 
 
-
 const app = express();
 
 app.set("port", process.env.PORT || 3001);
@@ -63,19 +62,5 @@ app.use((req, res, next) => {
     next();
   }
 });
-
-// app.use(function (req, res, next) {
-//   next(createError(404));
-// });
-
-// app.use((req, res, next, err = {}) => {
-//   // set locals, only providing error in development
-//   res.locals.message = err.message;
-//   res.locals.error = req.app.get("env") === "development" ? err : {};
-
-//   // render the error page
-//   res.status(err.status || 500);
-//   res.render("error");
-// });
 
 export default app;

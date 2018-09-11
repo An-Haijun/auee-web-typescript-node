@@ -1,13 +1,13 @@
-import { Response, Request, NextFunction } from "express";
 import { login } from "../controllers/api/UserApi";
 
 class RouterMain {
     $app: any;
+    apiBody: string = process.env.API_BODY;
     constructor(app: any) {
         this.$app = app;
     }
     api() {
-        this.$app.get("/account/login", login);
+        this.$app.get(this.apiBody + "/account/login", login);
     }
 }
 
