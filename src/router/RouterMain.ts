@@ -1,4 +1,4 @@
-import { login } from "../controllers/api/UserApi";
+import { login, register, getUserById, updateUser, getUsers, getUserIdentity } from "../controllers/api/UserApi";
 
 class RouterMain {
     $app: any;
@@ -7,7 +7,12 @@ class RouterMain {
         this.$app = app;
     }
     api() {
-        this.$app.get(this.apiBody + "/account/login", login);
+        this.$app.post(this.apiBody + "/account/login", login);
+        this.$app.post(this.apiBody + "/account/register", register);
+        this.$app.post(this.apiBody + "/account/getUserById", getUserById);
+        this.$app.post(this.apiBody + "/account/updateUser", updateUser);
+        this.$app.post(this.apiBody + "/account/getUsers", getUsers);
+        this.$app.post(this.apiBody + "/account/getUserIdentity", getUserIdentity);
     }
 }
 

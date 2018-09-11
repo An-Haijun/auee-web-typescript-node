@@ -9,7 +9,7 @@ interface Map {
 }
 class JsonResult {
     constructoe() { }
-    setMap(options: any) {
+    setMap(options: any = {}) {
         if (!options) {
             console.error("params is not null");
             return;
@@ -25,7 +25,7 @@ class JsonResult {
         resolve.error_code = options.error_code || 0;
         resolve.error_msg = options.error_msg || "";
         options.result = options.result && this.__formatDate(options.result);
-        resolve.result = resolve.result && options.result[0] || "";
+        resolve.result = options.result && options.result[0] || "";
         resolve.timestamp = utils.dateFormat().all;
         return resolve;
     }
