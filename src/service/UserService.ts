@@ -1,6 +1,8 @@
 import Promise from "bluebird";
 import UserDao from "./dao/UserDao";
 import jsonResult from "../util/JsonResult";
+import utils from "../util/FormatData";
+import Jwt from "../util/Jwt";
 
 const userDao = new UserDao();
 class UserService {
@@ -19,6 +21,11 @@ class UserService {
                 const data = jsonResult.setMap({
                     result: res
                 });
+                const jwt = new Jwt({
+                    data: data.result.id,
+                    usedTime: 300
+                });
+                data.result.token = jwt.generateToken();
                 if (parseInt(data.result.is_disabled) == 1) {
                     const data = jsonResult.error({
                         error_code: 403,
@@ -43,7 +50,7 @@ class UserService {
                 if (res && res.length == 0) {
                     const data = jsonResult.error({
                         error_code: 1,
-                        error_msg: "你说咋就没有成功创建用户呢？"
+                        error_msg: "创建新用户没有成功啊"
                     });
                     resolve(data);
                     return;
@@ -86,6 +93,7 @@ class UserService {
         });
     }
     updateUser(options: any) {
+        options.update_at = utils.dateFormat().all;
         return new Promise((resolve, reject) => {
             userDao.updateUser(options).then((res: any) => {
                 if (res && res.length == 0) {
@@ -108,6 +116,8 @@ class UserService {
         });
     }
     getUsers(options: any) {
+        options.page_size = options.page_size ? options.page_size : 10;
+        options.page = options.page ? (options.page - 1) * options.page_size : 0;
         return new Promise((resolve, reject) => {
             userDao.getUsers(options).then((res: any) => {
                 if (res && res.length == 0) {

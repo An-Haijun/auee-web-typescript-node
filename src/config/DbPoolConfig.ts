@@ -17,9 +17,9 @@ class DbConfig {
     constructor() { }
     query(sql: string, params: any = {}) {
         return new Promise(($resolve, $reject) => {
-            if (this.poolConnection._closed) {
+            /* if (this.poolConnection._closed) {
                 this.poolConnection = mysql.createPool(this.config);
-            }
+            } */
             const $poolConnection = this.poolConnection;
 
             const connectFun = () => {
@@ -55,7 +55,7 @@ class DbConfig {
                 $resolve(res);
             }).catch((err: any) => {
                 $reject(err);
-                console.log("抛出错误---");
+                console.log("抛出错误---", err);
                 $poolConnection.end(function (err: any) {
                     if (err) {
                         console.log("关闭数据库连接失败！");

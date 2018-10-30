@@ -5,7 +5,6 @@ import jsonResult from "../../util/JsonResult";
 
 const userService = new UserService();
 export const login = (req: Request, res: Response) => {
-  console.log(req.body);
   if (!req.body.user_name || !req.body.password) {
     const data = jsonResult.error({
       error_code: 1,

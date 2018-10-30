@@ -1,7 +1,6 @@
 import express from "express";
 import compression from "compression";  // compresses requests
 import bodyParser from "body-parser";
-import lusca from "lusca";
 import dotenv from "dotenv";
 import path from "path";
 import expressValidator from "express-validator";
@@ -11,7 +10,6 @@ dotenv.config({ path: ".env.example" });
 import parseJson from "./util/JsonResult";
 import Jwt from "./util/Jwt";
 import RouterMain from "./router/RouterMain";
-
 
 const app = express();
 
@@ -23,20 +21,13 @@ app.use(compression());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(expressValidator());
-app.use(lusca.xssProtection(true));
 
-app.use(
-  express.static(path.join(__dirname, "public"), { maxAge: 31557600000 })
-);
-
-const routerMain = new RouterMain(app);
-routerMain.api();
+// app.use("/static", express.static(path.join(__dirname, "util")));
 
 console.log("服务器运行中...");
 
-
 app.use((req, res, next) => {
-  if (req.url.indexOf("/api") > 0 && req.url != "/api/blog/account/login" && req.url != "/api/blog/account/register") {
+  if (req.url.indexOf("/api") > -1 && req.url != "/api/blog/account/login" && req.url != "/api/blog/account/register") {
     const token = req.headers.token;
     const jwt = new Jwt({ data: token });
     const result = jwt.verifyToken();
@@ -47,7 +38,7 @@ app.use((req, res, next) => {
         error_msg: "登录已过期,请重新登录"
       });
       res.json(resultData);
-      // res.render("login.html');
+      // res.render("login.html");
     } else if (result == "noToken") {
       const resultData = parseJson.error({
         success: false,
@@ -62,5 +53,8 @@ app.use((req, res, next) => {
     next();
   }
 });
+
+const routerMain = new RouterMain(app);
+routerMain.api();
 
 export default app;

@@ -21,6 +21,11 @@ class UserDao {
         return new Promise((resolve, reject) => {
             const sql: string = `insert into eye_users (name, user_name, password, mobile, email, intro, user_identity_id, is_disabled, is_delete, create_at, update_at)`
                 + ` values(${options.name}, ${options.user_name}, ${options.password}, ${options.mobile}, ${options.email}, ${options.intro}, ${options.user_identity_id}, false, false, ${options.create_at}, ${options.update_at})`;
+            dbConfig.query(sql).then((res) => {
+                resolve(res);
+            }).catch((err) => {
+                reject(err);
+            });
         });
     }
     getUserById(options: any) {
@@ -64,7 +69,6 @@ class UserDao {
                 header = header + ` intro = ${options.intro},`;
             }
             const sql: string = header + where;
-            console.log(`修改用户信息sql-----:${sql}`);
             dbConfig.query(sql).then((res) => {
                 resolve(res);
             }).catch((err) => {
@@ -77,16 +81,14 @@ class UserDao {
             let getUserCount: string = `SELECT COUNT(*) as total_count FROM eye_users as u where user_identity_id = ${options.user_identity_id} and is_delete = 0`;
             let getUserLists: string = `; select u.id, u.name, u.user_name,u.mobile,u.email,u.user_identity_id, u.is_disabled ,iden.content as identity_content, u.create_at from eye_users as u, eye_identity as iden`
                 + ` where u.user_identity_id = ${options.user_identity_id} and u.user_identity_id = iden.id and is_delete = 0`;
-
             if (options.name && options.user_name) {
                 options.name = "%" + options.name + "%";
                 options.user_name = "%" + options.user_name + "%";
                 getUserCount = getUserCount + ` and (u.name like ${options.name} or u.user_name like ${options.user_name})`;
                 getUserLists = getUserLists + ` and (u.name like ${options.name} or u.user_name like ${options.user_name})`;
             }
-            const sql: string = getUserCount + getUserLists;
-
-            console.log(sql, "----sql");
+            const limit: string = ` order by u.create_at desc limit ${options.page}, ${options.page_size}`;
+            const sql: string = getUserCount + getUserLists + limit;
             dbConfig.query(sql).then((res) => {
                 resolve(res);
             }).catch((err) => {
